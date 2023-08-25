@@ -1,14 +1,9 @@
-from django.urls import path, include
-from django.conf import settings
-from django.conf.urls.static import static
+from django.urls import path
 
-# from .views import 
+from . import views
 
 app_name = 'reviews'
 
 urlpatterns = [
-    # path('', views.PostListView.as_view(),
-    #      name='index'),
+    # path('about/', views.About.as_view(), name='about'),
 ]
-
-# urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
