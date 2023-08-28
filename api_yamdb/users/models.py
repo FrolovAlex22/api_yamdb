@@ -26,7 +26,6 @@ class User(AbstractUser):
         unique=True,
         max_length=settings.USER_FIELD_LEN
     )
-
     first_name = models.CharField(
         'Имя',
         max_length=settings.USER_FIELD_LEN,
