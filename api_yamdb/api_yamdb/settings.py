@@ -107,6 +107,8 @@ STATICFILES_DIRS = ((BASE_DIR / 'static/'),)
 # constants
 USER_FIELD_LEN = 200
 PAGE_SIZE = 10
+CONFIRM_CODE_LEN = 9
+NO_REPLY_MAIL = 'site@example.com'
 
 # auth settings
 AUTH_USER_MODEL = 'users.User'
