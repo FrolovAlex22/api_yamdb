@@ -12,13 +12,13 @@ from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 
 from api.permissions import IsAdmin
-from user.models import User
-from user.utils import sender_confirmation_code
+from users.models import User
+from users.utils import sender_confirmation_code
 
-from user.serializers import (GetTokenSerializer,
-                              SignupSerializer,
-                              UserMeSerializer,
-                              UserSerializer)
+from users.serializers import (GetTokenSerializer,
+                               SignUpSerializer,
+                               UserMeSerializer,
+                               UserSerializer)
 
 
 class UserViewSet(ModelViewSet):
@@ -54,7 +54,7 @@ class SignupView(APIView):
 
         if User.objects.filter(username=username).exists():
             user = get_object_or_404(User, username=username)
-            serializer = SignupSerializer(user,
+            serializer = SignUpSerializer(user,
                                           data=request.data,
                                           partial=True)
             serializer.is_valid(raise_exception=True)
@@ -66,7 +66,7 @@ class SignupView(APIView):
             sender_confirmation_code(request)
             return Response(serializer.data, status=HTTP_200_OK)
 
-        serializer = SignupSerializer(data=request.data)
+        serializer = SignUpSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         if User.objects.filter(
