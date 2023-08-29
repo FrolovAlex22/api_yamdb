@@ -104,6 +104,12 @@ STATIC_URL = '/static/'
 
 STATICFILES_DIRS = ((BASE_DIR / 'static/'),)
 
+# roles
+USER = 'user'
+MODERATOR = 'moderator'
+ADMIN = 'admin'
+
+
 # constants
 USER_FIELD_LEN = 200
 PAGE_SIZE = 10

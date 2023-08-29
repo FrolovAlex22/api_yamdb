@@ -6,9 +6,9 @@ from users.validators import UsernameValidator
 
 
 class User(AbstractUser):
-    USER = 'user'
-    MODERATOR = 'moderator'
-    ADMIN = 'admin'
+    USER = settings.USER
+    MODERATOR = settings.MODERATOR
+    ADMIN = settings.ADMIN
 
     CHOICES_ROLE = (
         (USER, 'Пользователь'),
