@@ -7,6 +7,16 @@ app_name = 'api'
 
 v1_router = routers.DefaultRouter()
 # v1_router.register(r'follow', FollowViewSet, basename='follows')
+v1_router.register(
+    r'titles/(?P<title_id>\d+)/reviews/(?P<review_id>\d+)/comments',
+    CommentViewSet,
+    basename='comments'
+)
+v1_router.register(
+    r'titles/(?P<title_id>\d+)/reviews',
+    ReviewViewSet,
+    basename='reviews'
+)
 
 urlpatterns = [
     path('', include(v1_router.urls)),
