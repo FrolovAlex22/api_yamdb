@@ -1,14 +1,29 @@
 from django.shortcuts import render
 from django.shortcuts import get_object_or_404
 
+
+from rest_framework import filters
+from rest_framework import mixins
+from rest_framework import viewsets
+from rest_framework.permissions import AllowAny
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.serializers import ModelSerializer
 from django.db.models.query import QuerySet
 
-from reviews.models import Review
+from reviews.models import Review, Category, Genre, Titles
 
-from .serializers import (CommentSerializer, ReviewSerializer)
-from .permissions import (IsAuthorModeratorAdminOrReadOnly)
+from .serializers import (
+    CommentSerializer,
+    ReviewSerializer,
+    TitlesSerializer,
+    GenreSerializer,
+    CategorySerializer
+)
+from .permissions import (
+    IsAuthorModeratorAdminOrReadOnly,
+    IsAdminOrSuperuser
+)
+
 
 
 # Create your views here.
@@ -73,3 +88,70 @@ class CommentViewSet(ModelViewSet):
         review_id = self.kwargs.get('review_id')
         review = get_object_or_404(Review, pk=review_id)
         serializer.save(author=self.request.user, review=review)
+
+
+class TitlesViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet служит для:
+    Получение списка всех произведений.
+    Получение информации о произведении.
+    Добавление произведения.
+    Частичное или полное обновление информации о произведении.
+    Удаление произведения.
+    """
+    queryset = Titles.objects.all()
+    serializer_class = TitlesSerializer
+    permission_classes = (AllowAny, )
+
+    def get_permissions(self):
+        if self.action == (
+            'create' or 'destroy' or 'partial_update' or 'update'
+        ):
+            return (IsAdminOrSuperuser(),)
+        return super().get_permissions()
+
+
+class ListCreateDeleteViewSet(
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    mixins.DestroyModelMixin,
+    viewsets.GenericViewSet
+):
+    """Набор mixins для GenreViewSet, CategoryViewSet."""
+    pass
+
+
+class GenreViewSet(ListCreateDeleteViewSet):
+    """
+    ViewSet GenreViewSet служит для:
+    Получение списка всех жанров.
+    Добавление жанра.
+    Удаление жанра.
+    """
+    queryset = Genre.objects.all()
+    serializer_class = GenreSerializer
+    permission_classes = (AllowAny, )
+
+    def get_permissions(self):
+        if self.action == ('create' or 'destroy'):
+            return (IsAdminOrSuperuser(),)
+        return super().get_permissions()
+
+
+class CategoryViewSet(ListCreateDeleteViewSet):
+    """
+    ViewSet CategoryViewSet служит для:
+    Получение списка всех категорий.
+    Добавление категории.
+    Удаление категории.
+    """
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
+    permission_classes = (AllowAny, )
+
+    def get_permissions(self):
+        if self.action == ('create' or 'destroy'):
+            return (IsAdminOrSuperuser(),)
+        return super().get_permissions()
