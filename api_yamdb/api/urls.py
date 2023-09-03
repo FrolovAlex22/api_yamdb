@@ -2,10 +2,12 @@ from django.urls import include, path
 from rest_framework import routers
 
 # from .views import CommentViewSet
+from users.views import UserViewSet
 
 app_name = 'api'
 
 v1_router = routers.DefaultRouter()
+v1_router.register(r'users', UserViewSet, basename='users')
 # v1_router.register(r'follow', FollowViewSet, basename='follows')
 v1_router.register(
     r'titles/(?P<title_id>\d+)/reviews/(?P<review_id>\d+)/comments',
@@ -19,7 +21,6 @@ v1_router.register(
 )
 
 urlpatterns = [
-    path('', include(v1_router.urls)),
-    # path('v1/', include('djoser.urls')),
-    # path('v1/', include('djoser.urls.jwt')),
+    path('v1/', include('users.urls')),
+    path('v1/', include(v1_router.urls))
 ]

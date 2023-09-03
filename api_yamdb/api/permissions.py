@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 from rest_framework.permissions import SAFE_METHODS, BasePermission
 
 
@@ -45,3 +46,11 @@ class IsAdminOrReadOnly(BasePermission):
             or (request.user.is_authenticated
                 and request.user.is_admin)
         )
+=======
+from rest_framework.permissions import BasePermission
+
+
+class IsAdmin(BasePermission):
+    def has_permission(self, request, view):
+        return request.user.is_admin
+>>>>>>> f9048512b79992d399a9ac1686e89a7281447ce3
