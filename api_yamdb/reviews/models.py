@@ -1,12 +1,18 @@
 from django.db import models
 
+from django.core.validators import RegexValidator
+
 
 class Genre(models.Model):
     name = models.CharField(
         max_length=256,
         verbose_name='Название'
     )
-    slug = models.SlugField(max_length=50, unique=True)
+    slug = models.SlugField(
+        max_length=50,
+        unique=True,
+        verbose_name = 'slug'
+    )
 
     class Meta:
         verbose_name = 'Жанр'
@@ -21,7 +27,16 @@ class Category(models.Model):
         max_length=256,
         verbose_name='Название'
     )
-    slug = models.SlugField(max_length=50, unique=True)
+    slug = models.SlugField(
+        max_length=50,
+        unique=True,
+        verbose_name = 'slug',
+        validators=[RegexValidator(
+            regex=r'^[0-9a-zA-Z]*$',
+            message='Поле "slug" должно состоять из символов:[0-9a-zA-Z]'
+            )
+        ]
+    )
 
     class Meta:
         verbose_name = 'Категория'
