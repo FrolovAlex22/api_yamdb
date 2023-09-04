@@ -2,8 +2,6 @@ from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
-from users.validators import UsernameValidator
-
 
 class User(AbstractUser):
     USER = settings.USER
@@ -14,12 +12,6 @@ class User(AbstractUser):
         (USER, 'Пользователь'),
         (MODERATOR, 'Модератор'),
         (ADMIN, 'Администратор'),
-    )
-    username = models.CharField(
-        'Имя пользователя',
-        max_length=settings.USER_FIELD_LEN,
-        unique=True,
-        validators=[UsernameValidator]
     )
     email = models.EmailField(
         'Электронная почта',
@@ -66,7 +58,8 @@ class User(AbstractUser):
 
     @property
     def is_admin(self):
-        return self.role == self.ADMIN or self.is_superuser or self.is_staff
+        return (self.role == self.ADMIN
+                or (self.is_staff and self.is_superuser))
 
     def __str__(self):
         return self.username

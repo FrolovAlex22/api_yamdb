@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
@@ -74,7 +73,7 @@ class SignupView(APIView):
             return Response('Электронный адрес уже существует',
                             status=HTTP_400_BAD_REQUEST)
 
-        if serializer.validated_data['username'] != settings.ADMIN:
+        if serializer.validated_data['username'] != 'admin':
             serializer.save()
             sender_confirmation_code(request)
             return Response(serializer.data, status=HTTP_200_OK)
