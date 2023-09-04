@@ -11,6 +11,7 @@ from reviews.models import Category, Genre, Titles, Comment, Review
 
 class CategorySerializer(serializers.ModelSerializer):
     """Сериализатор для CategoryViewSet"""
+
     class Meta:
         model = Category
         fields = ('name', 'slug')
@@ -28,6 +29,7 @@ class CategorySerializer(serializers.ModelSerializer):
 
 class GenreSerializer(serializers.ModelSerializer):
     """Сериализатор для GenreViewSet"""
+
     class Meta:
         model = Genre
         fields = ('name', 'slug')

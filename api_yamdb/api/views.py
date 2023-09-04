@@ -1,6 +1,4 @@
-from django.shortcuts import render
 from django.shortcuts import get_object_or_404
-
 
 from rest_framework import filters
 from rest_framework import mixins
@@ -11,8 +9,7 @@ from rest_framework.serializers import ModelSerializer
 from django.db.models.query import QuerySet
 
 from reviews.models import Review, Category, Genre, Titles
-
-from .serializers import (
+from api.serializers import (
     CommentSerializer,
     ReviewSerializer,
     TitlesSerializer,
@@ -25,8 +22,6 @@ from .permissions import (
 )
 
 
-
-# Create your views here.
 class ReviewViewSet(ModelViewSet):
     """
     Отзывы.
@@ -48,13 +43,13 @@ class ReviewViewSet(ModelViewSet):
     def get_queryset(self) -> QuerySet:
         """Возвращает отзывы."""
         title_id = self.kwargs.get('title_id')
-        title = get_object_or_404(Title, id=title_id)
+        title = get_object_or_404(Titles, id=title_id)
         return title.reviews.all()
 
     def perform_create(self, serializer: ModelSerializer) -> None:
         """Создаёт отзыв в БД."""
         title_id = self.kwargs.get('title_id')
-        title = get_object_or_404(Title, pk=title_id)
+        title = get_object_or_404(Titles, pk=title_id)
         serializer.save(author=self.request.user, title=title)
 
 
@@ -101,11 +96,11 @@ class TitlesViewSet(viewsets.ModelViewSet):
     """
     queryset = Titles.objects.all()
     serializer_class = TitlesSerializer
-    permission_classes = (AllowAny, )
+    permission_classes = (AllowAny,)
 
     def get_permissions(self):
         if self.action == (
-            'create' or 'destroy' or 'partial_update' or 'update'
+                'create' or 'destroy' or 'partial_update' or 'update'
         ):
             return (IsAdminOrSuperuser(),)
         return super().get_permissions()
@@ -130,7 +125,7 @@ class GenreViewSet(ListCreateDeleteViewSet):
     """
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    permission_classes = (AllowAny, )
+    permission_classes = (AllowAny,)
 
     def get_permissions(self):
         if self.action == ('create' or 'destroy'):
@@ -149,7 +144,7 @@ class CategoryViewSet(ListCreateDeleteViewSet):
     serializer_class = CategorySerializer
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
-    permission_classes = (AllowAny, )
+    permission_classes = (AllowAny,)
 
     def get_permissions(self):
         if self.action == ('create' or 'destroy'):

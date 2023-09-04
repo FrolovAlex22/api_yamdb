@@ -1,9 +1,14 @@
 from django.urls import include, path
 from rest_framework import routers
 
-from .views import TitlesViewSet, GenreViewSet, CategoryViewSet
+from api.views import (
+    CommentViewSet,
+    TitlesViewSet,
+    GenreViewSet,
+    CategoryViewSet,
+    ReviewViewSet
+)
 from users.views import UserViewSet
-
 
 app_name = 'api'
 

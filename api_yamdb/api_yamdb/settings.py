@@ -110,7 +110,7 @@ ADMIN = 'admin'
 
 
 # constants
-USER_FIELD_LEN = 200
+USER_FIELD_LEN = 150
 PAGE_SIZE = 10
 CONFIRM_CODE_LEN = 9
 NO_REPLY_MAIL = 'site@example.com'

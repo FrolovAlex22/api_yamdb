@@ -1,6 +1,11 @@
 from django.db import models
+from django.core.validators import (
+    RegexValidator,
+    MaxValueValidator,
+    MinValueValidator
+)
 
-from django.core.validators import RegexValidator, MaxValueValidator, MinValueValidator
+from users.models import User
 
 
 class Genre(models.Model):
@@ -11,7 +16,7 @@ class Genre(models.Model):
     slug = models.SlugField(
         max_length=50,
         unique=True,
-        verbose_name = 'slug'
+        verbose_name='slug'
     )
 
     class Meta:
@@ -30,11 +35,11 @@ class Category(models.Model):
     slug = models.SlugField(
         max_length=50,
         unique=True,
-        verbose_name = 'slug',
+        verbose_name='slug',
         validators=[RegexValidator(
             regex=r'^[0-9a-zA-Z]*$',
             message='Поле "slug" должно состоять из символов:[0-9a-zA-Z]'
-            )
+        )
         ]
     )
 
@@ -71,6 +76,7 @@ class Titles(models.Model):
     def __str__(self):
         return self.name
 
+
 class TitlesGenre(models.Model):
     titles = models.ForeignKey(Titles, on_delete=models.SET_NULL, null=True)
     genre = models.ForeignKey(Genre, on_delete=models.SET_NULL, null=True)
@@ -81,7 +87,7 @@ class TitlesGenre(models.Model):
 
 class Review(models.Model):
     title = models.ForeignKey(
-        Title,
+        Titles,
         verbose_name='Произведение',
         on_delete=models.CASCADE,
         related_name='reviews'
@@ -124,5 +130,3 @@ class Comment(models.Model):
     class Meta:
         verbose_name = 'Комментарий'
         verbose_name_plural = 'Комментарии'
-
-
