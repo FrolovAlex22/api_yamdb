@@ -6,7 +6,7 @@ from rest_framework.serializers import (CurrentUserDefault,
                                         ModelSerializer,
                                         SlugRelatedField, ValidationError)
 
-from reviews.models import Category, Genre, Titles, Comment, Review
+from reviews.models import Category, Genre, Titles, TitlesGenre, Comment, Review
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -45,6 +45,29 @@ class GenreSerializer(serializers.ModelSerializer):
         return data
 
 
+class TitleGenreSerializer(serializers.ModelSerializer):
+    """Сериализатор для GenreViewSet"""
+    name = serializers.StringRelatedField()
+    name = serializers.StringRelatedField()
+
+    class Meta:
+        model = Genre
+        fields = ('name', 'slug')
+
+
+
+
+class TitlesGetSerializer(serializers.ModelSerializer):
+    """Сериализатор для TitlesViewSet"""
+    genre = GenreSerializer(read_only=True, many=True)
+    category = CategorySerializer()
+
+    class Meta:
+        fields = ('id', 'name', 'year', 'description', 'genre', 'category')
+        model = Titles
+        
+
+
 class TitlesSerializer(serializers.ModelSerializer):
     """Сериализатор для TitlesViewSet"""
     genre = serializers.SlugRelatedField(
@@ -55,7 +78,7 @@ class TitlesSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
-        fields = ('name', 'year', 'description', 'genre', 'category')
+        fields = ('id', 'name', 'year', 'description', 'genre', 'category')
         model = Titles
 
     def validate(self, data):
@@ -81,7 +104,7 @@ class TitlesSerializer(serializers.ModelSerializer):
                 'Год выпуска произведения дожен быть раньше этого года'
             )
         return value
-
+    
 
 class ReviewSerializer(ModelSerializer):
     """Сериалайзер модели Review."""

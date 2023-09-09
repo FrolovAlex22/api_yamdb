@@ -3,10 +3,18 @@ from django.shortcuts import get_object_or_404
 from rest_framework import filters
 from rest_framework import mixins
 from rest_framework import viewsets
-from rest_framework.permissions import AllowAny
+from rest_framework.decorators import action
+from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly
+from rest_framework.response import Response
+from rest_framework.status import (HTTP_200_OK,
+                                   HTTP_201_CREATED,
+                                   HTTP_401_UNAUTHORIZED,
+                                   HTTP_403_FORBIDDEN,
+                                   HTTP_404_NOT_FOUND)
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.serializers import ModelSerializer
 from django.db.models.query import QuerySet
+from django_filters.rest_framework import DjangoFilterBackend
 
 from reviews.models import Review, Category, Genre, Titles
 from api.serializers import (
@@ -14,11 +22,14 @@ from api.serializers import (
     ReviewSerializer,
     TitlesSerializer,
     GenreSerializer,
-    CategorySerializer
+    CategorySerializer,
+    TitlesGetSerializer
 )
 from .permissions import (
     IsAuthorModeratorAdminOrReadOnly,
-    IsAdminOrSuperuser
+    IsAdminOrSuperuser,
+    IsAuthenticated,
+    IsAdmin
 )
 
 
@@ -86,24 +97,54 @@ class CommentViewSet(ModelViewSet):
 
 
 class TitlesViewSet(viewsets.ModelViewSet):
-    """
-    ViewSet служит для:
-    Получение списка всех произведений.
-    Получение информации о произведении.
-    Добавление произведения.
-    Частичное или полное обновление информации о произведении.
-    Удаление произведения.
-    """
+
     queryset = Titles.objects.all()
     serializer_class = TitlesSerializer
-    permission_classes = (AllowAny,)
+    filter_backends = (DjangoFilterBackend,)
+    filterset_fields = ('category', 'genre','name', 'year')
+    permission_classes = (IsAuthenticatedOrReadOnly,)
 
     def get_permissions(self):
-        if self.action == (
-                'create' or 'destroy' or 'partial_update' or 'update'
-        ):
+        if self.request.method in ['POST', 'DELETE', 'PUT', 'PATCH']:
             return (IsAdminOrSuperuser(),)
         return super().get_permissions()
+    
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return TitlesGetSerializer
+        return self.serializer_class
+
+    # def patch(self, request, pk):
+    #     if not request.user.is_authenticated:
+    #         return Response('Необходимо авторизоваться', status=HTTP_401_UNAUTHORIZED)
+    #     title_obj = get_object_or_404(Titles, pk=pk)
+    #     serializer = TitlesSerializer(title_obj, data=request.data, partial=True)
+    #     if serializer.is_valid():
+    #         serializer.save()
+    #         return Response(serializer.data, status=HTTP_201_CREATED)
+    #     return Response("wrong parameters", status=HTTP_404_NOT_FOUND)
+
+    # def update(self, request, pk, partial):
+    #     title = get_object_or_404(Titles, pk=pk)
+    #     data = request.data
+    #     category = data.get('category')
+    #     category_obj = get_object_or_404(Category,slug = category)
+    #     genre = data.get('genre')
+    #     genre_obj = get_object_or_404(Genre,slug = genre)
+    #     name = data.get('name')
+    #     if len(name) > 256:
+    #         return Response('Необходимо авторизоваться', HTTP_404_NOT_FOUND)
+
+    #     title.category = data.get(category_obj, title.category)
+    #     title.genre = data.get(genre_obj, title.genre)
+    #     title.name = data.get('name', title.name)
+    #     title.year = data.get('year', title.year)
+
+    #     title.save()
+    #     serializer = TitlesSerializer(title)
+    #     if not request.user.is_authenticated:
+    #         return Response('Необходимо авторизоваться', HTTP_401_UNAUTHORIZED)
+    #     return Response(serializer.data, status=HTTP_200_OK)
 
 
 class ListCreateDeleteViewSet(
@@ -117,18 +158,16 @@ class ListCreateDeleteViewSet(
 
 
 class GenreViewSet(ListCreateDeleteViewSet):
-    """
-    ViewSet GenreViewSet служит для:
-    Получение списка всех жанров.
-    Добавление жанра.
-    Удаление жанра.
-    """
+
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    permission_classes = (AllowAny,)
+    lookup_field = 'slug'
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
+    permission_classes = (IsAuthenticatedOrReadOnly,)
 
     def get_permissions(self):
-        if self.action == ('create' or 'destroy'):
+        if self.request.method in ['POST', 'DELETE', 'PUT', 'PATCH']:
             return (IsAdminOrSuperuser(),)
         return super().get_permissions()
 
@@ -141,12 +180,15 @@ class CategoryViewSet(ListCreateDeleteViewSet):
     Удаление категории.
     """
     queryset = Category.objects.all()
+    lookup_field = 'slug'
     serializer_class = CategorySerializer
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
-    permission_classes = (AllowAny,)
+    permission_classes = (IsAuthenticatedOrReadOnly,)
+
 
     def get_permissions(self):
-        if self.action == ('create' or 'destroy'):
+        if self.request.method in ['POST', 'DELETE', 'PUT', 'PATCH']:
             return (IsAdminOrSuperuser(),)
         return super().get_permissions()
+
