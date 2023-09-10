@@ -1,22 +1,17 @@
+from django.db.models.query import QuerySet
 from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
 
 from rest_framework import filters
 from rest_framework import mixins
 from rest_framework import viewsets
-from rest_framework.decorators import action
-from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly
-from rest_framework.response import Response
-from rest_framework.status import (HTTP_200_OK,
-                                   HTTP_201_CREATED,
-                                   HTTP_401_UNAUTHORIZED,
-                                   HTTP_403_FORBIDDEN,
-                                   HTTP_404_NOT_FOUND)
-from rest_framework.viewsets import ModelViewSet
+from rest_framework.permissions import (
+    IsAuthenticatedOrReadOnly,
+    BasePermission
+)
 from rest_framework.serializers import ModelSerializer
-from django.db.models.query import QuerySet
-from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.viewsets import ModelViewSet
 
-from reviews.models import Review, Category, Genre, Titles
 from api.serializers import (
     CommentSerializer,
     ReviewSerializer,
@@ -25,11 +20,12 @@ from api.serializers import (
     CategorySerializer,
     TitlesGetSerializer
 )
+from reviews.models import Review, Category, Genre, Titles
+
+from .filters import TitlesFilter
 from .permissions import (
     IsAuthorModeratorAdminOrReadOnly,
     IsAdminOrSuperuser,
-    IsAuthenticated,
-    IsAdmin
 )
 
 
@@ -97,54 +93,37 @@ class CommentViewSet(ModelViewSet):
 
 
 class TitlesViewSet(viewsets.ModelViewSet):
+    """
+    Произведения, к которым пишут отзывы
+    (определённый фильм, книга или песенка).
+
+    Получить список всех объектов: Доступно без токена
+        GET: /titles/
+    Добавить новое произведение: Администратор.
+        POST: /titles/
+    Информация о произведении: Доступно без токена
+        GET: /titles/{titles_id}/
+    Обновить информацию о произведении: Администратор
+        PATCH: /titles/{titles_id}/
+    Удалить произведение: Администратор.
+        DELETE: /titles/{titles_id}/
+    """
 
     queryset = Titles.objects.all()
     serializer_class = TitlesSerializer
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('category', 'genre','name', 'year')
+    filterset_class = TitlesFilter
     permission_classes = (IsAuthenticatedOrReadOnly,)
 
-    def get_permissions(self):
+    def get_permissions(self) -> BasePermission:
         if self.request.method in ['POST', 'DELETE', 'PUT', 'PATCH']:
             return (IsAdminOrSuperuser(),)
         return super().get_permissions()
     
-    def get_serializer_class(self):
+    def get_serializer_class(self) -> ModelSerializer:
         if self.request.method == 'GET':
             return TitlesGetSerializer
         return self.serializer_class
-
-    # def patch(self, request, pk):
-    #     if not request.user.is_authenticated:
-    #         return Response('Необходимо авторизоваться', status=HTTP_401_UNAUTHORIZED)
-    #     title_obj = get_object_or_404(Titles, pk=pk)
-    #     serializer = TitlesSerializer(title_obj, data=request.data, partial=True)
-    #     if serializer.is_valid():
-    #         serializer.save()
-    #         return Response(serializer.data, status=HTTP_201_CREATED)
-    #     return Response("wrong parameters", status=HTTP_404_NOT_FOUND)
-
-    # def update(self, request, pk, partial):
-    #     title = get_object_or_404(Titles, pk=pk)
-    #     data = request.data
-    #     category = data.get('category')
-    #     category_obj = get_object_or_404(Category,slug = category)
-    #     genre = data.get('genre')
-    #     genre_obj = get_object_or_404(Genre,slug = genre)
-    #     name = data.get('name')
-    #     if len(name) > 256:
-    #         return Response('Необходимо авторизоваться', HTTP_404_NOT_FOUND)
-
-    #     title.category = data.get(category_obj, title.category)
-    #     title.genre = data.get(genre_obj, title.genre)
-    #     title.name = data.get('name', title.name)
-    #     title.year = data.get('year', title.year)
-
-    #     title.save()
-    #     serializer = TitlesSerializer(title)
-    #     if not request.user.is_authenticated:
-    #         return Response('Необходимо авторизоваться', HTTP_401_UNAUTHORIZED)
-    #     return Response(serializer.data, status=HTTP_200_OK)
 
 
 class ListCreateDeleteViewSet(
@@ -158,6 +137,16 @@ class ListCreateDeleteViewSet(
 
 
 class GenreViewSet(ListCreateDeleteViewSet):
+    """
+    Получение списка всех жанров.
+
+    Получить список всех жанров: Доступно без токена
+        GET: /genres/
+    Добавить жанр: Администратор.
+        POST /genres/
+    Удалить жанр. Права доступа: Администратор.
+        DELETE: /genres/{slug}/
+    """
 
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
@@ -166,7 +155,7 @@ class GenreViewSet(ListCreateDeleteViewSet):
     search_fields = ('name',)
     permission_classes = (IsAuthenticatedOrReadOnly,)
 
-    def get_permissions(self):
+    def get_permissions(self) -> BasePermission:
         if self.request.method in ['POST', 'DELETE', 'PUT', 'PATCH']:
             return (IsAdminOrSuperuser(),)
         return super().get_permissions()
@@ -174,10 +163,14 @@ class GenreViewSet(ListCreateDeleteViewSet):
 
 class CategoryViewSet(ListCreateDeleteViewSet):
     """
-    ViewSet CategoryViewSet служит для:
     Получение списка всех категорий.
-    Добавление категории.
-    Удаление категории.
+
+    Получить список всех категорий: Доступно без токена
+        GET: /categories/
+    Создать категорию: Администратор.
+        POST /categories/
+    Удалить категорию: Администратор.
+        DELETE: /categories/{slug}/
     """
     queryset = Category.objects.all()
     lookup_field = 'slug'
@@ -186,9 +179,7 @@ class CategoryViewSet(ListCreateDeleteViewSet):
     search_fields = ('name',)
     permission_classes = (IsAuthenticatedOrReadOnly,)
 
-
-    def get_permissions(self):
+    def get_permissions(self) -> BasePermission:
         if self.request.method in ['POST', 'DELETE', 'PUT', 'PATCH']:
             return (IsAdminOrSuperuser(),)
         return super().get_permissions()
-

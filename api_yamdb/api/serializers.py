@@ -45,18 +45,6 @@ class GenreSerializer(serializers.ModelSerializer):
         return data
 
 
-class TitleGenreSerializer(serializers.ModelSerializer):
-    """Сериализатор для GenreViewSet"""
-    name = serializers.StringRelatedField()
-    name = serializers.StringRelatedField()
-
-    class Meta:
-        model = Genre
-        fields = ('name', 'slug')
-
-
-
-
 class TitlesGetSerializer(serializers.ModelSerializer):
     """Сериализатор для TitlesViewSet"""
     genre = GenreSerializer(read_only=True, many=True)
