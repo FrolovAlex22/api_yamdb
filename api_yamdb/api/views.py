@@ -1,17 +1,34 @@
-from django.shortcuts import render
-from django.shortcuts import get_object_or_404
-
-from rest_framework.viewsets import ModelViewSet
-from rest_framework.serializers import ModelSerializer
 from django.db.models.query import QuerySet
+from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
 
-from reviews.models import Review
+from rest_framework import filters
+from rest_framework import mixins
+from rest_framework import viewsets
+from rest_framework.permissions import (
+    IsAuthenticatedOrReadOnly,
+    BasePermission
+)
+from rest_framework.serializers import ModelSerializer
+from rest_framework.viewsets import ModelViewSet
 
-from .serializers import (CommentSerializer, ReviewSerializer)
-from .permissions import (IsAuthorModeratorAdminOrReadOnly)
+from api.serializers import (
+    CommentSerializer,
+    ReviewSerializer,
+    TitlesSerializer,
+    GenreSerializer,
+    CategorySerializer,
+    TitlesGetSerializer
+)
+from reviews.models import Review, Category, Genre, Titles
+
+from .filters import TitlesFilter
+from .permissions import (
+    IsAuthorModeratorAdminOrReadOnly,
+    IsAdminOrSuperuser,
+)
 
 
-# Create your views here.
 class ReviewViewSet(ModelViewSet):
     """
     Отзывы.
@@ -33,13 +50,13 @@ class ReviewViewSet(ModelViewSet):
     def get_queryset(self) -> QuerySet:
         """Возвращает отзывы."""
         title_id = self.kwargs.get('title_id')
-        title = get_object_or_404(Title, id=title_id)
+        title = get_object_or_404(Titles, id=title_id)
         return title.reviews.all()
 
     def perform_create(self, serializer: ModelSerializer) -> None:
         """Создаёт отзыв в БД."""
         title_id = self.kwargs.get('title_id')
-        title = get_object_or_404(Title, pk=title_id)
+        title = get_object_or_404(Titles, pk=title_id)
         serializer.save(author=self.request.user, title=title)
 
 
@@ -73,3 +90,96 @@ class CommentViewSet(ModelViewSet):
         review_id = self.kwargs.get('review_id')
         review = get_object_or_404(Review, pk=review_id)
         serializer.save(author=self.request.user, review=review)
+
+
+class TitlesViewSet(viewsets.ModelViewSet):
+    """
+    Произведения, к которым пишут отзывы
+    (определённый фильм, книга или песенка).
+
+    Получить список всех объектов: Доступно без токена
+        GET: /titles/
+    Добавить новое произведение: Администратор.
+        POST: /titles/
+    Информация о произведении: Доступно без токена
+        GET: /titles/{titles_id}/
+    Обновить информацию о произведении: Администратор
+        PATCH: /titles/{titles_id}/
+    Удалить произведение: Администратор.
+        DELETE: /titles/{titles_id}/
+    """
+
+    queryset = Titles.objects.all()
+    serializer_class = TitlesSerializer
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = TitlesFilter
+    permission_classes = (IsAuthenticatedOrReadOnly,)
+
+    def get_permissions(self) -> BasePermission:
+        if self.request.method in ['POST', 'DELETE', 'PUT', 'PATCH']:
+            return (IsAdminOrSuperuser(),)
+        return super().get_permissions()
+
+    def get_serializer_class(self) -> ModelSerializer:
+        if self.request.method == 'GET':
+            return TitlesGetSerializer
+        return self.serializer_class
+
+
+class ListCreateDeleteViewSet(
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    mixins.DestroyModelMixin,
+    viewsets.GenericViewSet
+):
+    """Набор mixins для GenreViewSet, CategoryViewSet."""
+    pass
+
+
+class GenreViewSet(ListCreateDeleteViewSet):
+    """
+    Категории жанров.
+
+    Получить список всех жанров: Доступно без токена
+        GET: /genres/
+    Добавить жанр: Администратор.
+        POST /genres/
+    Удалить жанр. Права доступа: Администратор.
+        DELETE: /genres/{slug}/
+    """
+
+    queryset = Genre.objects.all()
+    serializer_class = GenreSerializer
+    lookup_field = 'slug'
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
+    permission_classes = (IsAuthenticatedOrReadOnly,)
+
+    def get_permissions(self) -> BasePermission:
+        if self.request.method in ['POST', 'DELETE', 'PUT', 'PATCH']:
+            return (IsAdminOrSuperuser(),)
+        return super().get_permissions()
+
+
+class CategoryViewSet(ListCreateDeleteViewSet):
+    """
+    Категории (типы) произведений.
+
+    Получить список всех категорий: Доступно без токена
+        GET: /categories/
+    Создать категорию: Администратор.
+        POST /categories/
+    Удалить категорию: Администратор.
+        DELETE: /categories/{slug}/
+    """
+    queryset = Category.objects.all()
+    lookup_field = 'slug'
+    serializer_class = CategorySerializer
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
+    permission_classes = (IsAuthenticatedOrReadOnly,)
+
+    def get_permissions(self) -> BasePermission:
+        if self.request.method in ['POST', 'DELETE', 'PUT', 'PATCH']:
+            return (IsAdminOrSuperuser(),)
+        return super().get_permissions()
