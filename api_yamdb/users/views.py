@@ -21,6 +21,24 @@ from users.serializers import (GetTokenSerializer,
 
 
 class UserViewSet(ModelViewSet):
+    """
+    Пользователи.
+
+    Получение списка всех отзывов: Доступно без токена
+        GET: /users/
+    Добавить нового пользователя: Администратор.
+        POST: /users/
+    Получить пользователя по username: Администратор.
+        GET: /users/{username}/
+    Изменить данные пользователя по username: Администратор.
+        PATCH: /users/{username}/
+    Удалить пользователя по username: Администратор.
+        DELETE: /users/{username}/
+    Получить данные своей учетной записи: Любой авторизованный пользователь.
+        GET: /users/me/
+    Изменить данные своей учетной записи: Любой авторизованный пользователь.
+        PATCH: /users/me/
+    """
     queryset = User.objects.all()
     serializer_class = UserSerializer
     search_fields = ('username',)
@@ -46,6 +64,12 @@ class UserViewSet(ModelViewSet):
 
 
 class SignupView(APIView):
+    """
+    Регистрация нового пользователя.
+
+    Получить код подтверждения на переданный email: Доступно без токена.
+        POST: /auth/signup/
+    """
     permission_classes = (AllowAny,)
 
     def post(self, request):
@@ -83,6 +107,13 @@ class SignupView(APIView):
 
 
 class GetTokenView(TokenObtainPairView):
+    """
+    Получение JWT-токена.
+
+    Получение JWT-токена в обмен на username и confirmation code:
+    Доступно без токена.
+        POST: /auth/token/
+    """
     serializer_class = GetTokenSerializer
     permission_classes = (AllowAny,)
 

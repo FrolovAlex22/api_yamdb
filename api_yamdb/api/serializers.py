@@ -1,12 +1,58 @@
-import datetime as dt
+
 from collections import OrderedDict
+import datetime as dt
 
 from rest_framework import serializers
 from rest_framework.serializers import (CurrentUserDefault,
                                         ModelSerializer,
-                                        SlugRelatedField, ValidationError)
+                                        SlugRelatedField,
+                                        ValidationError)
 
-from reviews.models import Category, Genre, Titles, TitlesGenre, Comment, Review
+from reviews.models import Category, Genre, Titles, Comment, Review
+
+
+class ReviewSerializer(ModelSerializer):
+    """Сериалайзер модели Review."""
+    author = SlugRelatedField(
+        slug_field='username',
+        read_only=True,
+        default=CurrentUserDefault()
+    )
+    title = SlugRelatedField(
+        slug_field='name',
+        read_only=True
+    )
+
+    class Meta:
+        model = Review
+        fields = '__all__'
+
+    def validate(self, data: OrderedDict) -> OrderedDict:
+        """Защита от повторов отзыва от пользователя."""
+        if self.context['request'].method != 'POST':
+            return data
+        author = self.context['request'].user
+        title_id = self.context['view'].kwargs.get('title_id')
+        if Review.objects.filter(author=author, title_id=title_id).exists():
+            raise ValidationError('Отзыв уже был ранее')
+        return data
+
+
+class CommentSerializer(ModelSerializer):
+    """Сериалайзер модели Comment."""
+    author = SlugRelatedField(
+        slug_field='username',
+        read_only=True,
+        default=CurrentUserDefault()
+    )
+    review = SlugRelatedField(
+        slug_field='text',
+        read_only=True
+    )
+
+    class Meta:
+        model = Comment
+        fields = '__all__'
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -53,7 +99,6 @@ class TitlesGetSerializer(serializers.ModelSerializer):
     class Meta:
         fields = ('id', 'name', 'year', 'description', 'genre', 'category')
         model = Titles
-        
 
 
 class TitlesSerializer(serializers.ModelSerializer):
@@ -66,7 +111,7 @@ class TitlesSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
-        fields = ('id', 'name', 'year', 'description', 'genre', 'category')
+        fields = '__all__'
         model = Titles
 
     def validate(self, data):
@@ -92,47 +137,3 @@ class TitlesSerializer(serializers.ModelSerializer):
                 'Год выпуска произведения дожен быть раньше этого года'
             )
         return value
-    
-
-class ReviewSerializer(ModelSerializer):
-    """Сериалайзер модели Review."""
-    author = SlugRelatedField(
-        slug_field='username',
-        read_only=True,
-        default=CurrentUserDefault()
-    )
-    title = SlugRelatedField(
-        slug_field='name',
-        read_only=True
-    )
-
-    class Meta:
-        model = Review
-        fields = '__all__'
-
-    def validate(self, data: OrderedDict) -> OrderedDict:
-        """Защита от повторов отзыва от пользователя."""
-        if self.context['request'].method != 'POST':
-            return data
-        author = self.context['request'].user
-        title_id = self.context['view'].kwargs.get('title_id')
-        if Review.objects.filter(author=author, title_id=title_id).exists():
-            raise ValidationError('Отзыв уже был ранее')
-        return data
-
-
-class CommentSerializer(ModelSerializer):
-    """Сериалайзер модели Comment."""
-    author = SlugRelatedField(
-        slug_field='username',
-        read_only=True,
-        default=CurrentUserDefault()
-    )
-    review = SlugRelatedField(
-        slug_field='text',
-        read_only=True
-    )
-
-    class Meta:
-        model = Comment
-        fields = '__all__'

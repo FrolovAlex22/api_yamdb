@@ -119,7 +119,7 @@ class TitlesViewSet(viewsets.ModelViewSet):
         if self.request.method in ['POST', 'DELETE', 'PUT', 'PATCH']:
             return (IsAdminOrSuperuser(),)
         return super().get_permissions()
-    
+
     def get_serializer_class(self) -> ModelSerializer:
         if self.request.method == 'GET':
             return TitlesGetSerializer
@@ -138,7 +138,7 @@ class ListCreateDeleteViewSet(
 
 class GenreViewSet(ListCreateDeleteViewSet):
     """
-    Получение списка всех жанров.
+    Категории жанров.
 
     Получить список всех жанров: Доступно без токена
         GET: /genres/
@@ -163,7 +163,7 @@ class GenreViewSet(ListCreateDeleteViewSet):
 
 class CategoryViewSet(ListCreateDeleteViewSet):
     """
-    Получение списка всех категорий.
+    Категории (типы) произведений.
 
     Получить список всех категорий: Доступно без токена
         GET: /categories/
