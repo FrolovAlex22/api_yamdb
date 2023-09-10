@@ -15,14 +15,14 @@ from rest_framework.viewsets import ModelViewSet
 from api.serializers import (
     CommentSerializer,
     ReviewSerializer,
-    TitlesSerializer,
+    TitleSerializer,
     GenreSerializer,
     CategorySerializer,
-    TitlesGetSerializer
+    TitleGetSerializer
 )
-from reviews.models import Review, Category, Genre, Titles
+from reviews.models import Review, Category, Genre, Title
 
-from .filters import TitlesFilter
+from .filters import TitleFilter
 from .permissions import (
     IsAuthorModeratorAdminOrReadOnly,
     IsAdminOrSuperuser,
@@ -50,13 +50,13 @@ class ReviewViewSet(ModelViewSet):
     def get_queryset(self) -> QuerySet:
         """Возвращает отзывы."""
         title_id = self.kwargs.get('title_id')
-        title = get_object_or_404(Titles, id=title_id)
+        title = get_object_or_404(Title, id=title_id)
         return title.reviews.all()
 
     def perform_create(self, serializer: ModelSerializer) -> None:
         """Создаёт отзыв в БД."""
         title_id = self.kwargs.get('title_id')
-        title = get_object_or_404(Titles, pk=title_id)
+        title = get_object_or_404(Title, pk=title_id)
         serializer.save(author=self.request.user, title=title)
 
 
@@ -92,7 +92,7 @@ class CommentViewSet(ModelViewSet):
         serializer.save(author=self.request.user, review=review)
 
 
-class TitlesViewSet(viewsets.ModelViewSet):
+class TitleViewSet(viewsets.ModelViewSet):
     """
     Произведения, к которым пишут отзывы
     (определённый фильм, книга или песенка).
@@ -109,10 +109,10 @@ class TitlesViewSet(viewsets.ModelViewSet):
         DELETE: /titles/{titles_id}/
     """
 
-    queryset = Titles.objects.all()
-    serializer_class = TitlesSerializer
+    queryset = Title.objects.all()
+    serializer_class = TitleSerializer
     filter_backends = (DjangoFilterBackend,)
-    filterset_class = TitlesFilter
+    filterset_class = TitleFilter
     permission_classes = (IsAuthenticatedOrReadOnly,)
 
     def get_permissions(self) -> BasePermission:
@@ -122,7 +122,7 @@ class TitlesViewSet(viewsets.ModelViewSet):
 
     def get_serializer_class(self) -> ModelSerializer:
         if self.request.method == 'GET':
-            return TitlesGetSerializer
+            return TitleGetSerializer
         return self.serializer_class
 
 

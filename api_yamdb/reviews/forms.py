@@ -1,11 +1,11 @@
 from django import forms
-from .models import Titles, Category, Genre
+from .models import Title, Category, Genre
 
 
 class TitleForm(forms.ModelForm):
 
     class Meta:
-        model = Titles
+        model = Title
         fields = '__all__'
 
 

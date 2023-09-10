@@ -1,14 +1,14 @@
-
 from collections import OrderedDict
 import datetime as dt
 
+from django.db.models import Avg
 from rest_framework import serializers
 from rest_framework.serializers import (CurrentUserDefault,
                                         ModelSerializer,
                                         SlugRelatedField,
                                         ValidationError)
 
-from reviews.models import Category, Genre, Titles, Comment, Review
+from reviews.models import Category, Genre, Title, Comment, Review
 
 
 class ReviewSerializer(ModelSerializer):
@@ -91,18 +91,30 @@ class GenreSerializer(serializers.ModelSerializer):
         return data
 
 
-class TitlesGetSerializer(serializers.ModelSerializer):
-    """Сериализатор для TitlesViewSet"""
+class TitleGetSerializer(serializers.ModelSerializer):
+    """Сериализатор для TitleViewSet"""
     genre = GenreSerializer(read_only=True, many=True)
     category = CategorySerializer()
+    rating = serializers.SerializerMethodField()
 
     class Meta:
-        fields = ('id', 'name', 'year', 'description', 'genre', 'category')
-        model = Titles
+        fields = (
+            'id',
+            'name',
+            'year',
+            'rating',
+            'description',
+            'genre',
+            'category'
+        )
+        model = Title
+
+    def get_rating(self, obj):
+        return obj.reviews.all().aggregate(Avg('score'))['score__avg']
 
 
-class TitlesSerializer(serializers.ModelSerializer):
-    """Сериализатор для TitlesViewSet"""
+class TitleSerializer(serializers.ModelSerializer):
+    """Сериализатор для TitleViewSet"""
     genre = serializers.SlugRelatedField(
         slug_field='slug', many=True, queryset=Genre.objects.all()
     )
@@ -112,7 +124,7 @@ class TitlesSerializer(serializers.ModelSerializer):
 
     class Meta:
         fields = '__all__'
-        model = Titles
+        model = Title
 
     def validate(self, data):
         name = data.get('name')
