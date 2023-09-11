@@ -3,7 +3,7 @@ from rest_framework import routers
 
 from api.views import (
     CommentViewSet,
-    TitlesViewSet,
+    TitleViewSet,
     GenreViewSet,
     CategoryViewSet,
     ReviewViewSet
@@ -13,7 +13,7 @@ from users.views import UserViewSet
 app_name = 'api'
 
 v1_router = routers.DefaultRouter()
-v1_router.register(r'titles', TitlesViewSet, basename='titles')
+v1_router.register(r'titles', TitleViewSet, basename='title')
 v1_router.register(r'genres', GenreViewSet, basename='genres')
 v1_router.register(r'categories', CategoryViewSet, basename='categories')
 v1_router.register(r'users', UserViewSet, basename='users')
