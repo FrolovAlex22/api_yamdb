@@ -48,6 +48,7 @@ class TitleViewSet(viewsets.ModelViewSet):
 
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
+    http_method_names = ('get', 'post', 'patch', 'delete')
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitleFilter
     permission_classes = (IsAuthenticatedOrReadOnly,)
@@ -138,6 +139,7 @@ class ReviewViewSet(ModelViewSet):
         DELETE: /titles/{title_id}/reviews/{review_id}/
     """
     serializer_class = ReviewSerializer
+    http_method_names = ('get', 'post', 'patch', 'delete')
     permission_classes = (IsAuthorModeratorAdminOrReadOnly,)
 
     def get_queryset(self) -> QuerySet:
@@ -170,6 +172,7 @@ class CommentViewSet(ModelViewSet):
         DELETE: /titles/{title_id}/reviews/{review_id}/comments/{comment_id}/
     """
     serializer_class = CommentSerializer
+    http_method_names = ('get', 'post', 'patch', 'delete')
     permission_classes = (IsAuthorModeratorAdminOrReadOnly,)
 
     def get_queryset(self) -> QuerySet:
