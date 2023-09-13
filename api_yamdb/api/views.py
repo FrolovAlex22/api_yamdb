@@ -14,19 +14,19 @@ from rest_framework.serializers import ModelSerializer
 from rest_framework.viewsets import ModelViewSet
 
 from api.serializers import (
-    CommentSerializer,
-    ReviewSerializer,
-    TitleSerializer,
-    GenreSerializer,
     CategorySerializer,
-    TitleGetSerializer
+    CommentSerializer,
+    GenreSerializer,
+    ReviewSerializer,
+    TitleGetSerializer,
+    TitleSerializer,
 )
-from reviews.models import Review, Category, Genre, Title
+from reviews.models import Category, Genre, Review, Title
 
 from .filters import TitleFilter
 from .permissions import (
-    IsAuthorModeratorAdminOrReadOnly,
     IsAdminOrSuperuser,
+    IsAuthorModeratorAdminOrReadOnly
 )
 
 

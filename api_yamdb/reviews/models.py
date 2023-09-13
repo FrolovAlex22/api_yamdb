@@ -1,9 +1,9 @@
-from django.db import models
 from django.core.validators import (
     RegexValidator,
     MaxValueValidator,
     MinValueValidator
 )
+from django.db import models
 
 from api.validators import year_validator
 from users.models import User
@@ -67,7 +67,8 @@ class Title(models.Model):
     description = models.TextField(verbose_name='Описание', blank=True)
     genre = models.ManyToManyField(
         Genre,
-        through='TitleGenre', verbose_name='Жанр'
+        through='TitleGenre',
+        verbose_name='Жанр'
     )
     category = models.ForeignKey(
         Category,
