@@ -1,3 +1,4 @@
+from django.db.models import Avg
 from django.db.models.query import QuerySet
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
@@ -52,6 +53,9 @@ class TitleViewSet(viewsets.ModelViewSet):
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitleFilter
     permission_classes = (IsAuthenticatedOrReadOnly,)
+
+    def get_queryset(self):
+        return super().get_queryset().annotate(rating=Avg('reviews__score'))
 
     def get_permissions(self) -> BasePermission:
         if self.request.method in ['POST', 'DELETE', 'PUT', 'PATCH']:

@@ -1,12 +1,12 @@
 from collections import OrderedDict
-import datetime as dt
 
-from django.db.models import Avg
 from rest_framework import serializers
-from rest_framework.serializers import (CurrentUserDefault,
-                                        ModelSerializer,
-                                        SlugRelatedField,
-                                        ValidationError)
+from rest_framework.serializers import (
+    CurrentUserDefault,
+    ModelSerializer,
+    SlugRelatedField,
+    ValidationError
+)
 
 from reviews.models import Category, Genre, Title, Comment, Review
 
@@ -66,7 +66,7 @@ class TitleGetSerializer(serializers.ModelSerializer):
         model = Title
 
     def get_rating(self, obj):
-        return obj.reviews.all().aggregate(Avg('score'))['score__avg']
+        return obj.rating
 
 
 class TitleSerializer(serializers.ModelSerializer):
@@ -95,16 +95,16 @@ class TitleSerializer(serializers.ModelSerializer):
                 raise ValidationError('Не указано поле category')
         return data
 
-    def validate_year(self, value):
-        if not value:
-            raise ValidationError(
-                'Не указано поле year'
-            )
-        if value > dt.datetime.now().year:
-            raise serializers.ValidationError(
-                'Год выпуска произведения дожен быть раньше этого года'
-            )
-        return value
+    # def validate_year(self, value):
+    #     if not value:
+    #         raise ValidationError(
+    #             'Не указано поле year'
+    #         )
+    #     if value > dt.datetime.now().year:
+    #         raise serializers.ValidationError(
+    #             'Год выпуска произведения дожен быть раньше этого года'
+    #         )
+    #     return value
 
 
 class ReviewSerializer(ModelSerializer):
