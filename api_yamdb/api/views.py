@@ -54,7 +54,7 @@ class TitleViewSet(viewsets.ModelViewSet):
     filterset_class = TitleFilter
     permission_classes = (IsAuthenticatedOrReadOnly,)
 
-    def get_queryset(self):
+    def get_queryset(self) -> QuerySet:
         return super().get_queryset().annotate(rating=Avg('reviews__score'))
 
     def get_permissions(self) -> BasePermission:
