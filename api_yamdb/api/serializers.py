@@ -8,7 +8,7 @@ from rest_framework.serializers import (CurrentUserDefault,
                                         SlugRelatedField,
                                         ValidationError)
 
-from reviews.models import Category, Genre, Titles, Comment, Review
+from reviews.models import Category, Genre, Titles, Comment, Review, User
 
 
 class ReviewSerializer(ModelSerializer):
@@ -31,9 +31,8 @@ class ReviewSerializer(ModelSerializer):
         """Защита от повторов отзыва от пользователя."""
         if self.context['request'].method != 'POST':
             return data
-        author = self.context['request'].user
         title_id = self.context['view'].kwargs.get('title_id')
-        if Review.objects.filter(author=author, title_id=title_id).exists():
+        if User.reviews.get(title=title_id).exists():
             raise ValidationError('Отзыв уже был ранее')
         return data
 

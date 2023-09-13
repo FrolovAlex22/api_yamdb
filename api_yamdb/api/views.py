@@ -81,14 +81,16 @@ class CommentViewSet(ModelViewSet):
 
     def get_queryset(self) -> QuerySet:
         """Возвращает комментарий."""
-        review_id = self.kwargs.get('review_id')
-        review = get_object_or_404(Review, id=review_id)
+        id = self.kwargs.get('review_id')
+        title_id = self.kwargs.get('title_id')
+        review = get_object_or_404(Review, id=id, title_id=title_id)
         return review.comments.all()
 
     def perform_create(self, serializer: ModelSerializer) -> None:
         """Создаёт комментарий в БД."""
-        review_id = self.kwargs.get('review_id')
-        review = get_object_or_404(Review, pk=review_id)
+        id = self.kwargs.get('review_id')
+        title_id = self.kwargs.get('title_id')
+        review = get_object_or_404(Review, id=id, title_id=title_id)
         serializer.save(author=self.request.user, review=review)
 
 
