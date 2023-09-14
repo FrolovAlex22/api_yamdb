@@ -68,14 +68,15 @@ class Title(models.Model):
     genre = models.ManyToManyField(
         Genre,
         through='TitleGenre',
-        verbose_name='Жанр'
+        verbose_name='Жанр',
+        related_name='titles'
     )
     category = models.ForeignKey(
         Category,
         on_delete=models.SET_NULL,
         null=True,
         verbose_name='Категория',
-        related_name='category',
+        related_name='titles'
     )
 
     class Meta:
@@ -142,7 +143,7 @@ class Review(models.Model):
     text = models.TextField(verbose_name='Текст')
     pub_date = models.DateTimeField(
         auto_now_add=True,
-        verbose_name = 'Дата'
+        verbose_name='Дата'
     )
 
     class Meta:
@@ -171,7 +172,7 @@ class Comment(models.Model):
     text = models.TextField(verbose_name='Текст')
     pub_date = models.DateTimeField(
         auto_now_add=True,
-        verbose_name = 'Дата'
+        verbose_name='Дата'
     )
 
     class Meta:
