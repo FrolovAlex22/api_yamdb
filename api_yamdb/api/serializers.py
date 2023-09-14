@@ -118,7 +118,9 @@ class ReviewSerializer(ModelSerializer):
         if self.context['request'].method != 'POST':
             return data
         title_id = self.context['view'].kwargs.get('title_id')
-        if User.reviews.get(title=title_id).exists():
+        author = self.context['request'].user
+        user = User.objects.get(username=author)
+        if user.reviews.get(title=title_id):
             raise ValidationError('Отзыв уже был ранее')
         return data
 

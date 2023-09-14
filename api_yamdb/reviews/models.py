@@ -129,14 +129,21 @@ class Review(models.Model):
         verbose_name='Рейтинг',
         default=1,
         validators=[
-            MinValueValidator(min_rating, 'Возможны значения по шкале от 1 до 10'),
-            MaxValueValidator(max_rating, 'Возможны значения по шкале от 1 до 10')
+            MinValueValidator(
+                min_rating,
+                'Возможны значения по шкале от 1 до 10'
+            ),
+            MaxValueValidator(
+                max_rating,
+                'Возможны значения по шкале от 1 до 10'
+            )
         ]
     )
     text = models.TextField(verbose_name='Текст')
     pub_date = models.DateTimeField(
         auto_now_add=True,
         verbose_name = 'Дата'
+    )
 
     class Meta:
         verbose_name = 'Отзыв'
@@ -165,6 +172,7 @@ class Comment(models.Model):
     pub_date = models.DateTimeField(
         auto_now_add=True,
         verbose_name = 'Дата'
+    )
 
     class Meta:
         verbose_name = 'Комментарий'
