@@ -1,6 +1,7 @@
 from collections import OrderedDict
 
 from rest_framework import serializers
+
 from rest_framework.serializers import (
     CurrentUserDefault,
     ModelSerializer,
@@ -8,7 +9,7 @@ from rest_framework.serializers import (
     ValidationError
 )
 
-from reviews.models import Category, Comment, Genre, Review, Title
+from reviews.models import Category, Comment, Genre, Review, Title, User
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -95,17 +96,6 @@ class TitleSerializer(serializers.ModelSerializer):
                 raise ValidationError('Не указано поле category')
         return data
 
-    # def validate_year(self, value):
-    #     if not value:
-    #         raise ValidationError(
-    #             'Не указано поле year'
-    #         )
-    #     if value > dt.datetime.now().year:
-    #         raise serializers.ValidationError(
-    #             'Год выпуска произведения дожен быть раньше этого года'
-    #         )
-    #     return value
-
 
 class ReviewSerializer(ModelSerializer):
     """Сериалайзер модели Review."""
@@ -127,9 +117,8 @@ class ReviewSerializer(ModelSerializer):
         """Защита от повторов отзыва от пользователя."""
         if self.context['request'].method != 'POST':
             return data
-        author = self.context['request'].user
         title_id = self.context['view'].kwargs.get('title_id')
-        if Review.objects.filter(author=author, title_id=title_id).exists():
+        if User.reviews.get(title=title_id).exists():
             raise ValidationError('Отзыв уже был ранее')
         return data
 

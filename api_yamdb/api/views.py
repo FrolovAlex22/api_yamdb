@@ -143,19 +143,18 @@ class ReviewViewSet(ModelViewSet):
         DELETE: /titles/{title_id}/reviews/{review_id}/
     """
     serializer_class = ReviewSerializer
-    http_method_names = ('get', 'post', 'patch', 'delete')
     permission_classes = (IsAuthorModeratorAdminOrReadOnly,)
 
     def get_queryset(self) -> QuerySet:
         """Возвращает отзывы."""
         title_id = self.kwargs.get('title_id')
-        title = get_object_or_404(Title, id=title_id)
+        title = get_object_or_404(Titles, id=title_id)
         return title.reviews.all()
 
     def perform_create(self, serializer: ModelSerializer) -> None:
         """Создаёт отзыв в БД."""
         title_id = self.kwargs.get('title_id')
-        title = get_object_or_404(Title, pk=title_id)
+        title = get_object_or_404(Titles, pk=title_id)
         serializer.save(author=self.request.user, title=title)
 
 
@@ -176,17 +175,18 @@ class CommentViewSet(ModelViewSet):
         DELETE: /titles/{title_id}/reviews/{review_id}/comments/{comment_id}/
     """
     serializer_class = CommentSerializer
-    http_method_names = ('get', 'post', 'patch', 'delete')
     permission_classes = (IsAuthorModeratorAdminOrReadOnly,)
 
     def get_queryset(self) -> QuerySet:
         """Возвращает комментарий."""
-        review_id = self.kwargs.get('review_id')
-        review = get_object_or_404(Review, id=review_id)
+        id = self.kwargs.get('review_id')
+        title_id = self.kwargs.get('title_id')
+        review = get_object_or_404(Review, id=id, title=title_id)
         return review.comments.all()
 
     def perform_create(self, serializer: ModelSerializer) -> None:
         """Создаёт комментарий в БД."""
-        review_id = self.kwargs.get('review_id')
-        review = get_object_or_404(Review, pk=review_id)
+        id = self.kwargs.get('review_id')
+        title_id = self.kwargs.get('title_id')
+        review = get_object_or_404(Review, id=id, title=title_id)
         serializer.save(author=self.request.user, review=review)

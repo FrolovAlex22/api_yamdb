@@ -111,6 +111,8 @@ class TitleGenre(models.Model):
 
 
 class Review(models.Model):
+    min_rating = 1
+    max_rating = 10
     title = models.ForeignKey(
         Title,
         verbose_name='Произведение',
@@ -123,16 +125,18 @@ class Review(models.Model):
         on_delete=models.CASCADE,
         related_name='reviews'
     )
-    score = models.IntegerField(
+    score = models.PositiveSmallIntegerField(
         verbose_name='Рейтинг',
         default=1,
         validators=[
-            MinValueValidator(1, 'Возможны значения по шкале от 1 до 10'),
-            MaxValueValidator(10, 'Возможны значения по шкале от 1 до 10')
+            MinValueValidator(min_rating, 'Возможны значения по шкале от 1 до 10'),
+            MaxValueValidator(max_rating, 'Возможны значения по шкале от 1 до 10')
         ]
     )
     text = models.TextField(verbose_name='Текст')
-    pub_date = models.DateTimeField(auto_now_add=True)
+    pub_date = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name = 'Дата'
 
     class Meta:
         verbose_name = 'Отзыв'
@@ -158,7 +162,9 @@ class Comment(models.Model):
         related_name='comments'
     )
     text = models.TextField(verbose_name='Текст')
-    pub_date = models.DateTimeField(auto_now_add=True)
+    pub_date = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name = 'Дата'
 
     class Meta:
         verbose_name = 'Комментарий'
