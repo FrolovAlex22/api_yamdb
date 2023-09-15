@@ -13,6 +13,7 @@ from rest_framework.permissions import (
 from rest_framework.serializers import ModelSerializer
 from rest_framework.viewsets import ModelViewSet
 
+from api.module_var import get_review_id, get_title_id
 from api.serializers import (
     CategorySerializer,
     CommentSerializer,
@@ -148,13 +149,13 @@ class ReviewViewSet(ModelViewSet):
 
     def get_queryset(self) -> QuerySet:
         """Возвращает отзывы."""
-        title_id = self.kwargs.get('title_id')
+        title_id = get_title_id(self)
         title = get_object_or_404(Title, id=title_id)
         return title.reviews.all()
 
     def perform_create(self, serializer: ModelSerializer) -> None:
         """Создаёт отзыв в БД."""
-        title_id = self.kwargs.get('title_id')
+        title_id = get_title_id(self)
         title = get_object_or_404(Title, pk=title_id)
         serializer.save(author=self.request.user, title=title)
 
@@ -181,14 +182,14 @@ class CommentViewSet(ModelViewSet):
 
     def get_queryset(self) -> QuerySet:
         """Возвращает комментарий."""
-        id = self.kwargs.get('review_id')
-        title_id = self.kwargs.get('title_id')
+        id = get_review_id(self)
+        title_id = get_title_id(self)
         review = get_object_or_404(Review, id=id, title=title_id)
         return review.comments.all()
 
     def perform_create(self, serializer: ModelSerializer) -> None:
         """Создаёт комментарий в БД."""
-        id = self.kwargs.get('review_id')
-        title_id = self.kwargs.get('title_id')
+        id = get_review_id(self)
+        title_id = get_title_id(self)
         review = get_object_or_404(Review, id=id, title=title_id)
         serializer.save(author=self.request.user, review=review)

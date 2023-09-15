@@ -9,6 +9,10 @@ from api.validators import year_validator
 from users.models import User
 
 
+MIN_RATING = 1
+MAX_RATING = 10
+
+
 class Genre(models.Model):
     name = models.CharField(
         max_length=256,
@@ -112,8 +116,6 @@ class TitleGenre(models.Model):
 
 
 class Review(models.Model):
-    min_rating = 1
-    max_rating = 10
     title = models.ForeignKey(
         Title,
         verbose_name='Произведение',
@@ -131,11 +133,11 @@ class Review(models.Model):
         default=1,
         validators=[
             MinValueValidator(
-                min_rating,
+                MIN_RATING,
                 'Возможны значения по шкале от 1 до 10'
             ),
             MaxValueValidator(
-                max_rating,
+                MAX_RATING,
                 'Возможны значения по шкале от 1 до 10'
             )
         ]
