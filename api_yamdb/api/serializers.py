@@ -166,7 +166,8 @@ class ReviewSerializer(ModelSerializer):
     #     return data
 
 # выдает ошибку: reviews.models.Review.DoesNotExist: Review matching query does
-# not exist. Тут я зашел немного с другой стороны, ищу в списке ревью нашего
+# not exist.
+# Тут я зашел немного с другой стороны, ищу в списке ревью нашего
 # пользователя конкретное произваедение, и если оно существует вывожу ошибку.
 # но его нет
 
@@ -183,7 +184,8 @@ class ReviewSerializer(ModelSerializer):
     #     return data
 
 # выдает ошибку: reviews.models.Review.DoesNotExist: Review matching query does
-# not exist.# Тут пытаюсь сперва убедится что для произведения есть хоть
+# not exist.
+# Тут пытаюсь сперва убедится что для произведения есть хоть
 # какое то ревью и уже если оно существует сверить ч/з модель User посредством
 # related_name проверить могу ли я дотягуться до поля title и извлечь его
 # значение методом get.# Не уверен таким способом можно извлекать значение.
