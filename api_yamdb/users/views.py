@@ -74,58 +74,27 @@ class SignupView(APIView):
 
     def post(self, request):
         username = request.data.get('username')
+        email = request.data.get('email')
 
-        if User.objects.filter(username=username).exists():
-            user = get_object_or_404(User, username=username)
-            serializer = SignUpSerializer(user,
-                                          data=request.data,
-                                          partial=True)
-            serializer.is_valid(raise_exception=True)
-
-            if serializer.validated_data['email'] != user.email:
-                return Response('Неверный электронный адрес',
-                                status=HTTP_400_BAD_REQUEST)
-            serializer.save(raise_exception=True)
+        if User.objects.filter(username=username, email=email).exists():
             sender_confirmation_code(request)
-            return Response(serializer.data, status=HTTP_200_OK)
+            return Response(request.data, status=HTTP_200_OK)
 
         serializer = SignUpSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-
-        if User.objects.filter(
-                email=serializer.validated_data['email']).exists():
-            return Response('Электронный адрес уже существует',
-                            status=HTTP_400_BAD_REQUEST)
-
-        if serializer.validated_data['username'] != 'admin':
-            serializer.save()
-            sender_confirmation_code(request)
-            return Response(serializer.data, status=HTTP_200_OK)
-
-        return Response('Нельзя использовать имя пользователя "admin"',
-                        status=HTTP_400_BAD_REQUEST)
+        serializer.save()
+        sender_confirmation_code(request)
+        return Response(serializer.data, status=HTTP_200_OK)
 
 
 class GetTokenView(TokenObtainPairView):
-    """
-    Получение JWT-токена.
-
-    Получение JWT-токена в обмен на username и confirmation code:
-    Доступно без токена.
-        POST: /auth/token/
-    """
-    serializer_class = GetTokenSerializer
     permission_classes = (AllowAny,)
 
-    def post(self, request):
-        serializer = self.serializer_class(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        username = serializer.validated_data['username']
-        confirmation_code = serializer.validated_data['confirmation_code']
-
-        user = get_object_or_404(User, username=username)
-        if user.confirmation_code != confirmation_code:
-            return Response('Неверный код подтверждения',
-                            status=HTTP_400_BAD_REQUEST)
-        token = f'{AccessToken.for_user(user)}'
-        return Response(token, status=HTTP_200_OK)
+    def post(self, request, *args, **kwargs):
+        serializer = GetTokenSerializer(data=request.data)
+        if serializer.is_valid():
+            username = serializer.validated_data['username']
+            user = get_object_or_404(User, username=username)
+            token = AccessToken.for_user(user)
+            return Response(token, status=HTTP_200_OK)
+        return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)

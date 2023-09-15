@@ -54,16 +54,11 @@ class GetTokenSerializer(Serializer):
         try:
             user = get_object_or_404(User, username=username)
         except User.DoesNotExist:
-            raise ValidationError(f'Пользователь {username} не найден')
+            return Response(f'Пользователь {username} не найден',
+                            status=status.HTTP_404_NOT_FOUND)
 
         if user.confirmation_code != confirmation_code:
-            ValidationError('Неверный код подтверждения')
-
-        if user.username != username:
-            return Response(
-                {'detail': 'Некорректные данные'},
-                status=status.HTTP_404_NOT_FOUND
-            )
+            raise ValidationError('Неверный код подтверждения')
 
         return data
 
@@ -75,7 +70,22 @@ class SignUpSerializer(ModelSerializer):
         model = User
         fields = ('username', 'email')
 
-    def validate_username(self, value):
-        if value.lower() == 'me':
+    def validate(self, data):
+        username = data.get('username')
+        email = data.get('email')
+
+        if User.objects.filter(email__iexact=email).exists():
+            raise ValidationError('Электронный адрес уже существует')
+
+        if User.objects.filter(username__iexact=username).exists():
+            raise ValidationError(f'Пользователь "{username}" уже существует')
+
+        if username.lower() == 'me':
             raise ValidationError('Нельзя использовать имя пользователя "me"')
-        return value
+
+        if username.lower() == 'admin':
+            raise ValidationError(
+                'Нельзя использовать имя пользователя "admin"'
+            )
+
+        return data
