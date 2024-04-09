@@ -1,3 +1,8 @@
+![Static Badge](https://img.shields.io/badge/Python-blue?logo=python&logoColor=%23F7DF1E)
+![Static Badge](https://img.shields.io/badge/Django-%23092E20?logo=django)
+![Static Badge](https://img.shields.io/badge/Django%20rest%20framework-red?logo=django&labelColor=%23092E20)
+![Static Badge](https://img.shields.io/badge/GitHub-%23181717?logo=github)
+
 ### Описание: 
 
 Проект YaMDb собирает отзывы пользователей на произведения.
